@@ -1,752 +1,496 @@
-// tests/cart.spec.ts
-import { test, expect, Page } from '@playwright/test';
+// cart.pages.ts - Page Object Model for Sauce Demo Cart Page
+// This file contains page objects and selectors for automated testing
 
-// Test data constants
-const BASE_URL = 'https://www.saucedemo.com';
-const VALID_PASSWORD = 'secret_sauce';
+export class CartPage {
+  // Page URL
+  static readonly URL = 'https://www.saucedemo.com/cart.html';
 
-const USERS = {
-  STANDARD: 'standard_user',
-  PROBLEM: 'problem_user',
-  PERFORMANCE_GLITCH: 'performance_glitch_user',
-  ERROR: 'error_user',
-  VISUAL: 'visual_user'
-};
+  // Header elements
+  static readonly HEADER_TITLE = '[data-test="title"]';
+  static readonly SHOPPING_CART_BADGE = '[data-test="shopping-cart-badge"]';
+  static readonly SHOPPING_CART_LINK = '[data-test="shopping-cart-link"]';
+  static readonly HAMBURGER_MENU = '#react-burger-menu-btn';
 
-// Expected product data for testing
-const TEST_PRODUCTS = [
-  { 
-    id: 'sauce-labs-backpack',
-    name: 'Sauce Labs Backpack', 
-    price: '$29.99',
-    description: 'carry.allTheThings() with the sleek, streamlined Sly Pack that melds uncompromising style with unequaled laptop and tablet protection.'
-  },
-  { 
-    id: 'sauce-labs-bike-light',
-    name: 'Sauce Labs Bike Light', 
-    price: '$9.99',
-    description: 'A red light isn\'t the desired state in testing but it sure helps when riding your bike at night. Water-resistant with 3 lighting modes, 1 AAA battery included.'
-  },
-  { 
-    id: 'sauce-labs-bolt-t-shirt',
-    name: 'Sauce Labs Bolt T-Shirt', 
-    price: '$15.99',
-    description: 'Get your testing superhero on with the Sauce Labs bolt T-shirt. From American Apparel, 100% ringspun combed cotton, heather gray with red bolt.'
-  }
-];
+  // Cart content selectors
+  static readonly CART_LIST = '[data-test="cart-list"]';
+  static readonly CART_ITEM = '[data-test="cart-item"]';
+  static readonly CART_ITEM_LABEL = '[data-test="cart-item-label"]';
+  static readonly INVENTORY_ITEM_NAME = '[data-test="inventory-item-name"]';
+  static readonly INVENTORY_ITEM_DESC = '[data-test="inventory-item-desc"]';
+  static readonly INVENTORY_ITEM_PRICE = '[data-test="inventory-item-price"]';
+  static readonly CART_QUANTITY = '[data-test="cart-quantity"]';
+  static readonly CART_QUANTITY_LABEL = '[data-test="cart-quantity-label"]';
 
-// Page Object Model for Login Page
-class LoginPage {
-  constructor(private page: Page) {}
+  // Action buttons
+  static readonly CONTINUE_SHOPPING_BUTTON = '[data-test="continue-shopping"]';
+  static readonly CHECKOUT_BUTTON = '[data-test="checkout"]';
+  static readonly REMOVE_BUTTON = '[data-test*="remove-"]';
 
-  async login(username: string, password: string) {
-    await this.page.goto(BASE_URL);
-    await this.page.fill('[data-test="username"]', username);
-    await this.page.fill('[data-test="password"]', password);
-    await this.page.click('[data-test="login-button"]');
-  }
-}
+  // Specific remove buttons for items
+  static readonly REMOVE_SAUCE_LABS_BACKPACK = '[data-test="remove-sauce-labs-backpack"]';
+  static readonly REMOVE_SAUCE_LABS_BIKE_LIGHT = '[data-test="remove-sauce-labs-bike-light"]';
+  static readonly REMOVE_SAUCE_LABS_BOLT_TSHIRT = '[data-test="remove-sauce-labs-bolt-t-shirt"]';
+  static readonly REMOVE_SAUCE_LABS_FLEECE_JACKET = '[data-test="remove-sauce-labs-fleece-jacket"]';
+  static readonly REMOVE_SAUCE_LABS_ONESIE = '[data-test="remove-sauce-labs-onesie"]';
+  static readonly REMOVE_TEST_ALLTHETHINGS_TSHIRT = '[data-test="remove-test.allthethings()-t-shirt-(red)"]';
 
-// Page Object Model for Inventory Page
-class InventoryPage {
-  constructor(private page: Page) {}
+  // Footer elements
+  static readonly FOOTER = '[data-test="footer"]';
+  static readonly FOOTER_COPY = '[data-test="footer-copy"]';
+  static readonly SOCIAL_TWITTER = '[data-test="social-twitter"]';
+  static readonly SOCIAL_FACEBOOK = '[data-test="social-facebook"]';
+  static readonly SOCIAL_LINKEDIN = '[data-test="social-linkedin"]';
 
-  async addProductToCart(productId: string) {
-    await this.page.click(`[data-test="add-to-cart-${productId}"]`);
+  // Page methods for interactions
+  async navigateToCart(): Promise<void> {
+    await page.goto(CartPage.URL);
   }
 
-  async addMultipleProductsToCart(productIds: string[]) {
-    for (const productId of productIds) {
-      await this.addProductToCart(productId);
-    }
+  async clickContinueShopping(): Promise<void> {
+    await page.click(CartPage.CONTINUE_SHOPPING_BUTTON);
   }
 
-  async navigateToCart() {
-    await this.page.click('.shopping_cart_link');
+  async clickCheckout(): Promise<void> {
+    await page.click(CartPage.CHECKOUT_BUTTON);
   }
 
-  async getCartBadgeCount() {
-    const badge = this.page.locator('.shopping_cart_badge');
-    if (await badge.isVisible()) {
-      return parseInt(await badge.textContent() || '0');
-    }
-    return 0;
-  }
-}
-
-// Page Object Model for Cart Page
-class CartPage {
-  constructor(private page: Page) {}
-
-  // Selectors
-  private pageTitle = '.title';
-  private cartList = '.cart_list';
-  private cartItems = '.cart_item';
-  private cartItemNames = '.inventory_item_name';
-  private cartItemDescriptions = '.inventory_item_desc';
-  private cartItemPrices = '.inventory_item_price';
-  private cartItemQuantities = '.cart_quantity';
-  private removeButtons = '[data-test*="remove"]';
-  private continueShoppingButton = '[data-test="continue-shopping"]';
-  private checkoutButton = '[data-test="checkout"]';
-  private cartBadge = '.shopping_cart_badge';
-  private emptyCartMessage = '.cart_item';
-  private cartFooter = '.cart_footer';
-
-  // Navigation methods
-  async isCartPageLoaded() {
-    await expect(this.page.locator(this.pageTitle)).toContainText('Your Cart');
-    await expect(this.page.locator(this.cartList)).toBeVisible();
+  async removeItem(itemName: string): Promise<void> {
+    const removeSelector = `[data-test="remove-${itemName.toLowerCase().replace(/\s+/g, '-')}"]`;
+    await page.click(removeSelector);
   }
 
-  async navigateToCart() {
-    await this.page.goto(`${BASE_URL}/cart.html`);
+  async getCartItemCount(): Promise<number> {
+    const items = await page.$$(CartPage.CART_ITEM);
+    return items.length;
   }
 
-  // Cart item methods
-  async getCartItemCount() {
-    return await this.page.locator(this.cartItems).count();
-  }
+  async getCartItems(): Promise<CartItem[]> {
+    const items = await page.$$(CartPage.CART_ITEM);
+    const cartItems: CartItem[] = [];
 
-  async getCartItemNames() {
-    return await this.page.locator(this.cartItemNames).allTextContents();
-  }
-
-  async getCartItemPrices() {
-    return await this.page.locator(this.cartItemPrices).allTextContents();
-  }
-
-  async getCartItemDescriptions() {
-    return await this.page.locator(this.cartItemDescriptions).allTextContents();
-  }
-
-  async getCartItemQuantities() {
-    const quantities = await this.page.locator(this.cartItemQuantities).allTextContents();
-    return quantities.map(q => parseInt(q));
-  }
-
-  async removeItemFromCart(productName: string) {
-    const productSelector = `[data-test="remove-${productName.toLowerCase().replace(/[\s\(\)\.]/g, '-')}"]`;
-    await this.page.click(productSelector);
-  }
-
-  async removeItemByIndex(index: number) {
-    const removeButtons = await this.page.locator(this.removeButtons).all();
-    if (removeButtons[index]) {
-      await removeButtons[index].click();
-    }
-  }
-
-  async removeAllItems() {
-    const removeButtons = await this.page.locator(this.removeButtons).all();
-    for (const button of removeButtons) {
-      await button.click();
-    }
-  }
-
-  async isItemInCart(productName: string) {
-    const itemNames = await this.getCartItemNames();
-    return itemNames.includes(productName);
-  }
-
-  async getItemQuantityByName(productName: string) {
-    const items = await this.page.locator(this.cartItems).all();
     for (const item of items) {
-      const nameElement = item.locator(this.cartItemNames);
-      const name = await nameElement.textContent();
-      if (name === productName) {
-        const quantityElement = item.locator(this.cartItemQuantities);
-        return parseInt(await quantityElement.textContent() || '0');
-      }
+      const name = await item.$eval(CartPage.INVENTORY_ITEM_NAME, el => el.textContent?.trim() || '');
+      const description = await item.$eval(CartPage.INVENTORY_ITEM_DESC, el => el.textContent?.trim() || '');
+      const price = await item.$eval(CartPage.INVENTORY_ITEM_PRICE, el => el.textContent?.trim() || '');
+      const quantity = await item.$eval(CartPage.CART_QUANTITY, el => el.textContent?.trim() || '1');
+
+      cartItems.push({
+        name,
+        description,
+        price,
+        quantity: parseInt(quantity)
+      });
     }
-    return 0;
+
+    return cartItems;
   }
 
-  // Cart state methods
-  async isCartEmpty() {
+  async isCartEmpty(): Promise<boolean> {
     const itemCount = await this.getCartItemCount();
     return itemCount === 0;
   }
 
-  async getCartBadgeCount() {
-    const badge = this.page.locator(this.cartBadge);
-    if (await badge.isVisible()) {
-      return parseInt(await badge.textContent() || '0');
+  async getCartBadgeCount(): Promise<number> {
+    try {
+      const badgeText = await page.textContent(CartPage.SHOPPING_CART_BADGE);
+      return badgeText ? parseInt(badgeText) : 0;
+    } catch {
+      return 0; // Badge not present when cart is empty
     }
-    return 0;
   }
 
-  async isCartBadgeVisible() {
-    return await this.page.locator(this.cartBadge).isVisible();
+  async waitForPageLoad(): Promise<void> {
+    await page.waitForSelector(CartPage.HEADER_TITLE);
+    await page.waitForSelector(CartPage.CONTINUE_SHOPPING_BUTTON);
+    await page.waitForSelector(CartPage.CHECKOUT_BUTTON);
   }
 
-  // Navigation methods
-  async clickContinueShopping() {
-    await this.page.click(this.continueShoppingButton);
+  async getPageTitle(): Promise<string> {
+    return await page.textContent(CartPage.HEADER_TITLE) || '';
+  }
+}
+
+// Interface for cart item data
+export interface CartItem {
+  name: string;
+  description: string;
+  price: string;
+  quantity: number;
+}
+
+// Alternative page object using CSS selectors (if data-test attributes are not available)
+export class CartPageCSS {
+  // Alternative selectors using CSS classes and IDs
+  static readonly HEADER_TITLE = '.header_secondary_container .title';
+  static readonly SHOPPING_CART_BADGE = '.shopping_cart_badge';
+  static readonly SHOPPING_CART_LINK = '.shopping_cart_link';
+  static readonly HAMBURGER_MENU = '#react-burger-menu-btn';
+
+  // Cart content
+  static readonly CART_LIST = '.cart_list';
+  static readonly CART_ITEM = '.cart_item';
+  static readonly INVENTORY_ITEM_NAME = '.inventory_item_name';
+  static readonly INVENTORY_ITEM_DESC = '.inventory_item_desc';
+  static readonly INVENTORY_ITEM_PRICE = '.inventory_item_price';
+  static readonly CART_QUANTITY = '.cart_quantity';
+
+  // Buttons
+  static readonly CONTINUE_SHOPPING_BUTTON = '#continue-shopping';
+  static readonly CHECKOUT_BUTTON = '#checkout';
+  static readonly REMOVE_BUTTON = '[class*="btn_secondary cart_button"]';
+
+  // Footer
+  static readonly FOOTER = '.footer';
+  static readonly FOOTER_COPY = '.footer_copy';
+}
+
+// Utility functions for cart operations
+export class CartUtils {
+  static async addItemToCart(itemName: string): Promise<void> {
+    const addToCartSelector = `[data-test="add-to-cart-${itemName.toLowerCase().replace(/\s+/g, '-')}"]`;
+    await page.click(addToCartSelector);
   }
 
-  async clickCheckout() {
-    await this.page.click(this.checkoutButton);
+  static async removeItemFromCart(itemName: string): Promise<void> {
+    const removeSelector = `[data-test="remove-${itemName.toLowerCase().replace(/\s+/g, '-')}"]`;
+    await page.click(removeSelector);
   }
 
-  async isContinueShoppingButtonVisible() {
-    return await this.page.locator(this.continueShoppingButton).isVisible();
-  }
-
-  async isCheckoutButtonVisible() {
-    return await this.page.locator(this.checkoutButton).isVisible();
-  }
-
-  // Cart validation methods
-  async validateCartItemStructure(index: number) {
-    const item = this.page.locator(this.cartItems).nth(index);
-    
-    await expect(item.locator('.inventory_item_name')).toBeVisible();
-    await expect(item.locator('.inventory_item_desc')).toBeVisible();
-    await expect(item.locator('.inventory_item_price')).toBeVisible();
-    await expect(item.locator('.cart_quantity')).toBeVisible();
-    await expect(item.locator('[data-test*="remove"]')).toBeVisible();
-  }
-
-  async calculateTotalPrice() {
-    const prices = await this.getCartItemPrices();
-    const quantities = await this.getCartItemQuantities();
-    
-    let total = 0;
-    for (let i = 0; i < prices.length; i++) {
-      const price = parseFloat(prices[i].replace('$', ''));
-      const quantity = quantities[i];
-      total += price * quantity;
+  static async getTotalPrice(): Promise<string> {
+    // This would be on checkout page, but useful for cart calculations
+    try {
+      return await page.textContent('.summary_total_label') || '0';
+    } catch {
+      return '0';
     }
-    return total;
   }
 
-  // Product interaction methods
-  async clickProductName(productName: string) {
-    await this.page.locator(this.cartItemNames, { hasText: productName }).click();
-  }
-
-  async getProductDetailsInCart(productName: string) {
-    const items = await this.page.locator(this.cartItems).all();
-    
+  static async validateCartContainsItem(itemName: string): Promise<boolean> {
+    const items = await page.$$(CartPage.INVENTORY_ITEM_NAME);
     for (const item of items) {
-      const nameElement = item.locator(this.cartItemNames);
-      const name = await nameElement.textContent();
-      
-      if (name === productName) {
-        const description = await item.locator(this.cartItemDescriptions).textContent();
-        const price = await item.locator(this.cartItemPrices).textContent();
-        const quantity = parseInt(await item.locator(this.cartItemQuantities).textContent() || '0');
-        
-        return { name, description, price, quantity };
+      const text = await item.textContent();
+      if (text?.includes(itemName)) {
+        return true;
       }
     }
-    return null;
+    return false;
   }
 }
 
-// Page Object Model for Product Detail Page (for navigation testing)
-class ProductDetailPage {
-  constructor(private page: Page) {}
+// Constants for common item names (for easier reference in tests)
+export const ITEMS = {
+  BACKPACK: 'sauce-labs-backpack',
+  BIKE_LIGHT: 'sauce-labs-bike-light',
+  BOLT_TSHIRT: 'sauce-labs-bolt-t-shirt',
+  FLEECE_JACKET: 'sauce-labs-fleece-jacket',
+  ONESIE: 'sauce-labs-onesie',
+  RED_TSHIRT: 'test.allthethings()-t-shirt-(red)'
+} as const;
 
-  private backButton = '[data-test="back-to-products"]';
+// Export default cart page instance
+export default new CartPage();
 
-  async isProductDetailPageLoaded() {
-    await expect(this.page.locator('[data-test="inventory-item-name"]')).toBeVisible();
-  }
-
-  async clickBackToProducts() {
-    await this.page.click(this.backButton);
-  }
-}
-
-test.describe('SauceDemo Cart Page Tests', () => {
-  let loginPage: LoginPage;
-  let inventoryPage: InventoryPage;
-  let cartPage: CartPage;
-  let productDetailPage: ProductDetailPage;
-
-  test.beforeEach(async ({ page }) => {
-    loginPage = new LoginPage(page);
-    inventoryPage = new InventoryPage(page);
-    cartPage = new CartPage(page);
-    productDetailPage = new ProductDetailPage(page);
-  });
-
-  test.describe('Cart Page Load and Display Tests', () => {
-    test('should load empty cart page correctly', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(page.url()).toContain('/cart.html');
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      expect(await cartPage.isCartBadgeVisible()).toBeFalsy();
-    });
-
-    test('should display cart page elements correctly', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.isContinueShoppingButtonVisible()).toBeTruthy();
-      expect(await cartPage.isCheckoutButtonVisible()).toBeTruthy();
-    });
-
-    test('should load cart page with items correctly', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      expect(await cartPage.isCartBadgeVisible()).toBeTruthy();
-      expect(await cartPage.getCartBadgeCount()).toBe(1);
-    });
-  });
-
-  test.describe('Cart Item Display Tests', () => {
-    test('should display single item correctly in cart', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      const itemNames = await cartPage.getCartItemNames();
-      const itemPrices = await cartPage.getCartItemPrices();
-      const itemQuantities = await cartPage.getCartItemQuantities();
-      
-      expect(itemNames).toContain(TEST_PRODUCTS[0].name);
-      expect(itemPrices).toContain(TEST_PRODUCTS[0].price);
-      expect(itemQuantities[0]).toBe(1);
-    });
-
-    test('should display multiple items correctly in cart', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id,
-        TEST_PRODUCTS[2].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(3);
-      
-      const itemNames = await cartPage.getCartItemNames();
-      expect(itemNames).toContain(TEST_PRODUCTS[0].name);
-      expect(itemNames).toContain(TEST_PRODUCTS[1].name);
-      expect(itemNames).toContain(TEST_PRODUCTS[2].name);
-    });
-
-    test('should display correct item details in cart', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      const productDetails = await cartPage.getProductDetailsInCart(TEST_PRODUCTS[0].name);
-      
-      expect(productDetails).not.toBeNull();
-      expect(productDetails!.name).toBe(TEST_PRODUCTS[0].name);
-      expect(productDetails!.price).toBe(TEST_PRODUCTS[0].price);
-      expect(productDetails!.quantity).toBe(1);
-    });
-
-    test('should validate cart item structure for all items', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      const itemCount = await cartPage.getCartItemCount();
-      for (let i = 0; i < itemCount; i++) {
-        await cartPage.validateCartItemStructure(i);
-      }
-    });
-  });
-
-  test.describe('Remove Items from Cart Tests', () => {
-    test('should remove single item from cart', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      await cartPage.removeItemFromCart(TEST_PRODUCTS[0].id);
-      
-      expect(await cartPage.getCartItemCount()).toBe(0);
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      expect(await cartPage.isCartBadgeVisible()).toBeFalsy();
-    });
-
-    test('should remove specific item from multiple items', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id,
-        TEST_PRODUCTS[2].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(3);
-      
-      await cartPage.removeItemFromCart(TEST_PRODUCTS[1].id);
-      
-      expect(await cartPage.getCartItemCount()).toBe(2);
-      expect(await cartPage.isItemInCart(TEST_PRODUCTS[1].name)).toBeFalsy();
-      expect(await cartPage.isItemInCart(TEST_PRODUCTS[0].name)).toBeTruthy();
-      expect(await cartPage.isItemInCart(TEST_PRODUCTS[2].name)).toBeTruthy();
-    });
-
-    test('should remove all items from cart', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id,
-        TEST_PRODUCTS[2].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(3);
-      
-      await cartPage.removeAllItems();
-      
-      expect(await cartPage.getCartItemCount()).toBe(0);
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      expect(await cartPage.isCartBadgeVisible()).toBeFalsy();
-    });
-
-    test('should update cart badge after removing items', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartBadgeCount()).toBe(2);
-      
-      await cartPage.removeItemByIndex(0);
-      expect(await cartPage.getCartBadgeCount()).toBe(1);
-      
-      await cartPage.removeItemByIndex(0);
-      expect(await cartPage.isCartBadgeVisible()).toBeFalsy();
-    });
-  });
-
-  test.describe('Cart Navigation Tests', () => {
-    test('should navigate back to inventory page via Continue Shopping', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await cartPage.navigateToCart();
-      
-      await cartPage.clickContinueShopping();
-      
-      expect(page.url()).toContain('/inventory.html');
-      await expect(page.locator('.title')).toContainText('Products');
-    });
-
-    test('should navigate to checkout page via Checkout button', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.clickCheckout();
-      
-      expect(page.url()).toContain('/checkout-step-one.html');
-    });
-
-    test('should maintain cart state when navigating back and forth', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      await cartPage.clickContinueShopping();
-      expect(page.url()).toContain('/inventory.html');
-      
-      await inventoryPage.navigateToCart();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-
-    test('should navigate to product detail from cart item name', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.clickProductName(TEST_PRODUCTS[0].name);
-      
-      expect(page.url()).toContain('/inventory-item.html');
-      await productDetailPage.isProductDetailPageLoaded();
-    });
-
-    test('should return to cart from product detail page', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.clickProductName(TEST_PRODUCTS[0].name);
-      await productDetailPage.isProductDetailPageLoaded();
-      
-      await productDetailPage.clickBackToProducts();
-      expect(page.url()).toContain('/inventory.html');
-    });
-  });
-
-  test.describe('Cart State Persistence Tests', () => {
-    test('should maintain cart state after page refresh', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      await page.reload();
-      await cartPage.isCartPageLoaded();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      expect(await cartPage.isItemInCart(TEST_PRODUCTS[0].name)).toBeTruthy();
-    });
-
-    test('should maintain cart state after browser back/forward', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      await cartPage.clickContinueShopping();
-      await page.goBack();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-
-    test('should handle direct URL access to cart page', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      
-      await page.goto(`${BASE_URL}/cart.html`);
-      await cartPage.isCartPageLoaded();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-  });
-
-  test.describe('Cart Functionality Edge Cases', () => {
-    test('should handle empty cart checkout attempt', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      
-      await cartPage.clickCheckout();
-      
-      // Should still navigate to checkout even with empty cart
-      expect(page.url()).toContain('/checkout-step-one.html');
-    });
-
-    test('should handle rapid add/remove operations', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      // Rapid remove/add cycles
-      await cartPage.removeItemFromCart(TEST_PRODUCTS[0].id);
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      
-      await cartPage.clickContinueShopping();
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-
-    test('should handle cart with maximum number of different items', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      
-      // Add all available products (6 total in SauceDemo)
-      const allProductIds = [
-        'sauce-labs-backpack',
-        'sauce-labs-bike-light',
-        'sauce-labs-bolt-t-shirt',
-        'sauce-labs-fleece-jacket',
-        'sauce-labs-onesie',
-        'test.allthethings()-t-shirt-(red)'
-      ];
-      
-      await inventoryPage.addMultipleProductsToCart(allProductIds);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(6);
-      expect(await cartPage.getCartBadgeCount()).toBe(6);
-    });
-
-    test('should handle cart operations with special characters in product names', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart('test.allthethings()-t-shirt-(red)');
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      expect(await cartPage.isItemInCart('Test.allTheThings() T-Shirt (Red)')).toBeTruthy();
-      
-      await cartPage.removeItemFromCart('test.allthethings()-t-shirt-(red)');
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-    });
-  });
-
-  test.describe('Cart Price Calculation Tests', () => {
-    test('should calculate correct total for single item', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      const calculatedTotal = await cartPage.calculateTotalPrice();
-      const expectedTotal = parseFloat(TEST_PRODUCTS[0].price.replace('$', ''));
-      
-      expect(calculatedTotal).toBe(expectedTotal);
-    });
-
-    test('should calculate correct total for multiple items', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id,
-        TEST_PRODUCTS[2].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      const calculatedTotal = await cartPage.calculateTotalPrice();
-      const expectedTotal = parseFloat(TEST_PRODUCTS[0].price.replace('$', '')) +
-                           parseFloat(TEST_PRODUCTS[1].price.replace('$', '')) +
-                           parseFloat(TEST_PRODUCTS[2].price.replace('$', ''));
-      
-      expect(calculatedTotal).toBeCloseTo(expectedTotal, 2);
-    });
-  });
-
-  test.describe('Cross-User Cart Behavior Tests', () => {
-    test('should handle cart operations with problem_user', async () => {
-      await loginPage.login(USERS.PROBLEM, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      await cartPage.removeItemFromCart(TEST_PRODUCTS[0].id);
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-    });
-
-    test('should handle cart operations with performance_glitch_user', async () => {
-      test.setTimeout(60000); // Extended timeout
-      
-      await loginPage.login(USERS.PERFORMANCE_GLITCH, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-
-    test('should handle cart operations with visual_user', async () => {
-      await loginPage.login(USERS.VISUAL, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      // Visual user should see cart items correctly
-      const itemNames = await cartPage.getCartItemNames();
-      expect(itemNames).toContain(TEST_PRODUCTS[0].name);
-    });
-  });
-
-  test.describe('Cart Accessibility and UX Tests', () => {
-    test('should maintain keyboard navigation in cart', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      // Test tab navigation through cart elements
-      await page.keyboard.press('Tab'); // Should focus on first interactive element
-      await page.keyboard.press('Tab');
-      await page.keyboard.press('Tab');
-      
-      // Should be able to activate buttons with Enter/Space
-      await page.keyboard.press('Enter');
-    });
-
-    test('should handle responsive design in cart', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      await cartPage.navigateToCart();
-      
-      // Test mobile viewport
-      await page.setViewportSize({ width: 375, height: 667 });
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-      
-      // Test tablet viewport
-      await page.setViewportSize({ width: 768, height: 1024 });
-      await cartPage.isCartPageLoaded();
-      expect(await cartPage.getCartItemCount()).toBe(1);
-    });
-
-    test('should display appropriate messages for empty cart', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await cartPage.navigateToCart();
-      
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
-      
-      // Should still show navigation buttons even when cart is empty
-      expect(await cartPage.isContinueShoppingButtonVisible()).toBeTruthy();
-      expect(await cartPage.isCheckoutButtonVisible()).toBeTruthy();
-    });
-  });
-
-  test.describe('Cart Performance Tests', () => {
-    test('should load cart page within acceptable time', async ({ page }) => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addProductToCart(TEST_PRODUCTS[0].id);
-      
-      const startTime = Date.now();
-      await cartPage.navigateToCart();
-      await cartPage.isCartPageLoaded();
-      const loadTime = Date.now() - startTime;
-      
-      expect(loadTime).toBeLessThan(5000); // 5 seconds max
-    });
-
-    test('should handle cart operations efficiently', async () => {
-      await loginPage.login(USERS.STANDARD, VALID_PASSWORD);
-      await inventoryPage.addMultipleProductsToCart([
-        TEST_PRODUCTS[0].id,
-        TEST_PRODUCTS[1].id,
-        TEST_PRODUCTS[2].id
-      ]);
-      await cartPage.navigateToCart();
-      
-      const startTime = Date.now();
-      
-      // Perform multiple cart operations
-      await cartPage.removeItemByIndex(0);
-      await cartPage.removeItemByIndex(0);
-      await cartPage.removeItemByIndex(0);
-      
-      const operationTime = Date.now() - startTime;
-      expect(operationTime).toBeLessThan(10000); // 10 seconds max for all operations
-    });
-  });
-});
-
-// Data-driven tests for cart operations
+// Data-driven test suite continuation
 test.describe('Data-Driven Cart Tests', () => {
   let loginPage: LoginPage;
   let inventoryPage: InventoryPage;
   let cartPage: CartPage;
 
   test.beforeEach(async ({ page }) => {
-    loginPage =
+    loginPage = new LoginPage(page);
+    inventoryPage = new InventoryPage(page);
+    cartPage = new CartPage(page);
+    
+    // Navigate to login page and authenticate
+    await loginPage.navigateToLogin();
+    await loginPage.login('standard_user', 'secret_sauce');
+    await inventoryPage.waitForPageLoad();
+  });
+
+  // Test data for different cart scenarios
+  const cartTestData = [
+    {
+      testName: 'Single Item Cart',
+      items: ['Sauce Labs Backpack'],
+      expectedCount: 1,
+      expectedTotal: '$29.99'
+    },
+    {
+      testName: 'Multiple Items Cart',
+      items: ['Sauce Labs Backpack', 'Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt'],
+      expectedCount: 3,
+      expectedTotal: '$55.97'
+    },
+    {
+      testName: 'All Items Cart',
+      items: [
+        'Sauce Labs Backpack',
+        'Sauce Labs Bike Light', 
+        'Sauce Labs Bolt T-Shirt',
+        'Sauce Labs Fleece Jacket',
+        'Sauce Labs Onesie',
+        'Test.allTheThings() T-Shirt (Red)'
+      ],
+      expectedCount: 6,
+      expectedTotal: '$129.94'
+    },
+    {
+      testName: 'High Value Items Only',
+      items: ['Sauce Labs Fleece Jacket', 'Sauce Labs Backpack'],
+      expectedCount: 2,
+      expectedTotal: '$79.98'
+    }
+  ];
+
+  // User test data for different user scenarios
+  const userTestData = [
+    {
+      username: 'standard_user',
+      password: 'secret_sauce',
+      description: 'Standard User'
+    },
+    {
+      username: 'performance_glitch_user',
+      password: 'secret_sauce',
+      description: 'Performance Glitch User'
+    },
+    {
+      username: 'problem_user',
+      password: 'secret_sauce',
+      description: 'Problem User'
+    }
+  ];
+
+  // Data-driven test for adding items to cart
+  cartTestData.forEach(({ testName, items, expectedCount, expectedTotal }) => {
+    test(`${testName} - Add items and verify cart`, async ({ page }) => {
+      // Add all items to cart
+      for (const item of items) {
+        await inventoryPage.addItemToCart(item);
+      }
+
+      // Navigate to cart
+      await cartPage.navigateToCart();
+      await cartPage.waitForPageLoad();
+
+      // Verify cart count
+      const actualCount = await cartPage.getCartItemCount();
+      expect(actualCount).toBe(expectedCount);
+
+      // Verify cart badge
+      const badgeCount = await cartPage.getCartBadgeCount();
+      expect(badgeCount).toBe(expectedCount);
+
+      // Verify all items are present
+      const cartItems = await cartPage.getCartItems();
+      expect(cartItems).toHaveLength(expectedCount);
+
+      // Verify each item is in cart
+      for (const item of items) {
+        const isItemPresent = await CartUtils.validateCartContainsItem(item);
+        expect(isItemPresent).toBeTruthy();
+      }
+    });
+  });
+
+  // Data-driven test for different users
+  userTestData.forEach(({ username, password, description }) => {
+    test(`Cart functionality for ${description}`, async ({ page }) => {
+      // Re-login with specific user
+      await loginPage.logout();
+      await loginPage.login(username, password);
+      await inventoryPage.waitForPageLoad();
+
+      // Add items to cart
+      await inventoryPage.addItemToCart('Sauce Labs Backpack');
+      await inventoryPage.addItemToCart('Sauce Labs Bike Light');
+
+      // Navigate to cart
+      await cartPage.navigateToCart();
+      await cartPage.waitForPageLoad();
+
+      // Verify cart functionality
+      const itemCount = await cartPage.getCartItemCount();
+      expect(itemCount).toBe(2);
+
+      // Test remove functionality
+      await cartPage.removeItem('sauce-labs-backpack');
+      const updatedCount = await cartPage.getCartItemCount();
+      expect(updatedCount).toBe(1);
+
+      // Test continue shopping
+      await cartPage.clickContinueShopping();
+      expect(page.url()).toContain('inventory.html');
+    });
+  });
+
+  // Remove items test data
+  const removeItemsTestData = [
+    {
+      testName: 'Remove Single Item',
+      itemsToAdd: ['Sauce Labs Backpack', 'Sauce Labs Bike Light'],
+      itemsToRemove: ['Sauce Labs Backpack'],
+      expectedFinalCount: 1
+    },
+    {
+      testName: 'Remove Multiple Items',
+      itemsToAdd: ['Sauce Labs Backpack', 'Sauce Labs Bike Light', 'Sauce Labs Bolt T-Shirt'],
+      itemsToRemove: ['Sauce Labs Backpack', 'Sauce Labs Bike Light'],
+      expectedFinalCount: 1
+    },
+    {
+      testName: 'Remove All Items',
+      itemsToAdd: ['Sauce Labs Backpack', 'Sauce Labs Bike Light'],
+      itemsToRemove: ['Sauce Labs Backpack', 'Sauce Labs Bike Light'],
+      expectedFinalCount: 0
+    }
+  ];
+
+  // Data-driven remove items tests
+  removeItemsTestData.forEach(({ testName, itemsToAdd, itemsToRemove, expectedFinalCount }) => {
+    test(`${testName} from cart`, async ({ page }) => {
+      // Add items to cart
+      for (const item of itemsToAdd) {
+        await inventoryPage.addItemToCart(item);
+      }
+
+      // Navigate to cart
+      await cartPage.navigateToCart();
+      await cartPage.waitForPageLoad();
+
+      // Verify initial count
+      const initialCount = await cartPage.getCartItemCount();
+      expect(initialCount).toBe(itemsToAdd.length);
+
+      // Remove specified items
+      for (const item of itemsToRemove) {
+        const itemKey = item.toLowerCase().replace(/\s+/g, '-').replace(/[()]/g, '');
+        await cartPage.removeItem(itemKey);
+      }
+
+      // Verify final count
+      const finalCount = await cartPage.getCartItemCount();
+      expect(finalCount).toBe(expectedFinalCount);
+
+      // Verify cart badge
+      if (expectedFinalCount === 0) {
+        const isEmpty = await cartPage.isCartEmpty();
+        expect(isEmpty).toBeTruthy();
+      } else {
+        const badgeCount = await cartPage.getCartBadgeCount();
+        expect(badgeCount).toBe(expectedFinalCount);
+      }
+    });
+  });
+
+  // Checkout flow test data
+  const checkoutTestData = [
+    {
+      items: ['Sauce Labs Backpack'],
+      userInfo: {
+        firstName: 'John',
+        lastName: 'Doe',
+        postalCode: '12345'
+      }
+    },
+    {
+      items: ['Sauce Labs Backpack', 'Sauce Labs Bike Light'],
+      userInfo: {
+        firstName: 'Jane',
+        lastName: 'Smith',
+        postalCode: '67890'
+      }
+    }
+  ];
+
+  // Data-driven checkout tests
+  checkoutTestData.forEach(({ items, userInfo }, index) => {
+    test(`Checkout flow ${index + 1} - ${items.length} item(s)`, async ({ page }) => {
+      // Add items to cart
+      for (const item of items) {
+        await inventoryPage.addItemToCart(item);
+      }
+
+      // Navigate to cart and proceed to checkout
+      await cartPage.navigateToCart();
+      await cartPage.waitForPageLoad();
+      await cartPage.clickCheckout();
+
+      // Fill checkout information (assuming CheckoutPage exists)
+      await page.fill('[data-test="firstName"]', userInfo.firstName);
+      await page.fill('[data-test="lastName"]', userInfo.lastName);
+      await page.fill('[data-test="postalCode"]', userInfo.postalCode);
+      await page.click('[data-test="continue"]');
+
+      // Verify checkout overview
+      expect(page.url()).toContain('checkout-step-two.html');
+      
+      // Verify items in checkout summary
+      const checkoutItems = await page.$(CartPage.CART_ITEM);
+      expect(checkoutItems).toHaveLength(items.length);
+    });
+  });
+
+  // Edge cases and error scenarios
+  test('Empty cart checkout attempt', async ({ page }) => {
+    await cartPage.navigateToCart();
+    await cartPage.waitForPageLoad();
+    
+    const isEmpty = await cartPage.isCartEmpty();
+    expect(isEmpty).toBeTruthy();
+    
+    // Checkout button should still be clickable but will show empty cart
+    await cartPage.clickCheckout();
+    expect(page.url()).toContain('checkout-step-one.html');
+  });
+
+  test('Cart persistence across page navigation', async ({ page }) => {
+    // Add items to cart
+    await inventoryPage.addItemToCart('Sauce Labs Backpack');
+    await inventoryPage.addItemToCart('Sauce Labs Bike Light');
+    
+    // Navigate to different pages and back
+    await cartPage.navigateToCart();
+    await cartPage.clickContinueShopping();
+    await cartPage.navigateToCart();
+    
+    // Verify items are still in cart
+    const itemCount = await cartPage.getCartItemCount();
+    expect(itemCount).toBe(2);
+  });
+
+  test('Cart badge updates correctly', async ({ page }) => {
+    // Initially no badge
+    let badgeCount = await cartPage.getCartBadgeCount();
+    expect(badgeCount).toBe(0);
+    
+    // Add one item
+    await inventoryPage.addItemToCart('Sauce Labs Backpack');
+    badgeCount = await cartPage.getCartBadgeCount();
+    expect(badgeCount).toBe(1);
+    
+    // Add another item
+    await inventoryPage.addItemToCart('Sauce Labs Bike Light');
+    badgeCount = await cartPage.getCartBadgeCount();
+    expect(badgeCount).toBe(2);
+    
+    // Remove one item from cart page
+    await cartPage.navigateToCart();
+    await cartPage.removeItem('sauce-labs-backpack');
+    badgeCount = await cartPage.getCartBadgeCount();
+    expect(badgeCount).toBe(1);
+  });
+
+  test.afterEach(async ({ page }) => {
+    // Clean up - remove all items from cart if any
+    try {
+      await cartPage.navigateToCart();
+      const items = await page.$(CartPage.REMOVE_BUTTON);
+      for (const item of items) {
+        await item.click();
+      }
+    } catch (error) {
+      // Cart might already be empty, ignore error
+    }
+  });
+});

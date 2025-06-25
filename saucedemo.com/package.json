@@ -1,11 +1,36 @@
 {
-  "name": "qa-automation-playwright",
+  "name": "saucedemo-automation-tests",
   "version": "1.0.0",
+  "description": "Comprehensive Playwright automation testing suite for SauceDemo login scenarios",
+  "main": "index.js",
   "scripts": {
-    "test": "npx playwright test"
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:webkit": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project='Mobile Chrome'",
+    "test:login": "playwright test login.spec.ts",
+    "test:smoke": "playwright test --grep @smoke",
+    "test:regression": "playwright test --grep @regression",
+    "report": "playwright show-report",
+    "install:browsers": "playwright install"
   },
+  "keywords": [
+    "playwright",
+    "automation",
+    "testing",
+    "typescript",
+    "e2e",
+    "saucedemo"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
   "devDependencies": {
-    "@playwright/test": "^1.38.0",
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
   }
 }

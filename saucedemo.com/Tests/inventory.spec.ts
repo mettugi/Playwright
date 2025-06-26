@@ -144,8 +144,14 @@ class InventoryPage {
     await this.page.selectOption(this.sortDropdown, sortOption);
   }
 
-  async getCurrentSortOption() {
-    return await this.page.locator(this.sortDropdown).inputValue();
+  //async getCurrentSortOption() {
+    //return await this.page.locator(this.sortDropdown).inputValue();
+  //}
+
+  async getCurrentSortOption(): Promise<string> {
+    const sortDropdown = this.page.locator('[data-test="product_sort_container"]');
+    await expect(sortDropdown).toBeVisible(); // 🔒 wait for visibility
+    return await sortDropdown.inputValue();   // ✅ will now work safely
   }
 
   // Menu methods

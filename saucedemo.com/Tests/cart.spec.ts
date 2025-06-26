@@ -133,10 +133,28 @@ class CartPage {
     return quantities.map(q => parseInt(q));
   }
 
+  //async removeItemFromCart(productName: string) {
+    //const productSelector = `[data-test="remove-${productName.toLowerCase().replace(/[\s\(\)\.]/g, '-')}"]`;
+    //await this.page.click(productSelector);
+  //}
+
   async removeItemFromCart(productName: string) {
-    const productSelector = `[data-test="remove-${productName.toLowerCase().replace(/[\s\(\)\.]/g, '-')}"]`;
-    await this.page.click(productSelector);
+  const items = await this.page.locator('.inventory_item_name').allTextContents();
+  console.log('DEBUG - Cart contains:', items);
+
+  const cartItem = this.page.locator('.cart_item').filter({
+    has: this.page.locator('.inventory_item_name', { hasText: productName })
+  });
+
+  const removeButton = cartItem.locator('button:has-text("Remove")');
+  
+  try {
+    await removeButton.first().waitFor({ state: 'visible', timeout: 5000 });
+    await removeButton.first().click();
+  } catch (error) {
+    throw new Error(`Could not find/remove item "${productName}". Available items: ${items.join(', ')}`);
   }
+}
 
   async removeItemByIndex(index: number) {
     const removeButtons = await this.page.locator(this.removeButtons).all();
@@ -615,8 +633,10 @@ test.describe('SauceDemo Cart Page Tests', () => {
       expect(await cartPage.getCartItemCount()).toBe(1);
       expect(await cartPage.isItemInCart('Test.allTheThings() T-Shirt (Red)')).toBeTruthy();
       
-      await cartPage.removeItemFromCart('test.allthethings()-t-shirt-(red)');
-      expect(await cartPage.isCartEmpty()).toBeTruthy();
+      await cartPage.removeItemFromCart("Test.allTheThings() T-Shirt (Red)");
+
+      const itemNames = await cartPage.getCartItemNames();
+      expect(itemNames).not.toContain("Test.allTheThings() T-Shirt (Red)");
     });
   });
 

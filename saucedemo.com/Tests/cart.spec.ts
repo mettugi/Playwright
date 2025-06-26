@@ -1,4 +1,3 @@
-
 // tests/cart.spec.ts
 import { test, expect, Page } from '@playwright/test';
 
@@ -62,9 +61,17 @@ class InventoryPage {
     }
   }
 
-  async navigateToCart() {
-    await this.page.click('.shopping_cart_link');
-  }
+  //async navigateToCart() {
+    //await this.page.click('.shopping_cart_link');
+  //}
+
+  async navigateToCart(): Promise<void> {
+  await this.page.locator('.shopping_cart_link').click();
+  await this.page.waitForURL('**/cart.html');
+  await this.page.waitForLoadState('networkidle');
+  await this.page.waitForSelector('.cart_item', { timeout: 5000 });
+}
+
 
   async getCartBadgeCount() {
     const badge = this.page.locator('.shopping_cart_badge');
@@ -138,12 +145,28 @@ class CartPage {
     }
   }
 
-  async removeAllItems() {
-    const removeButtons = await this.page.locator(this.removeButtons).all();
-    for (const button of removeButtons) {
-      await button.click();
+  //async removeAllItems() {
+    //const removeButtons = await this.page.locator(this.removeButtons).all();
+    //for (const button of removeButtons) {
+      //await button.click();
+    //}
+  //}
+
+  async removeAllItems(): Promise<void> {
+  const removeButtons = this.page.locator('[data-test*="remove"]');
+  while (await removeButtons.count() > 0) {
+    const first = removeButtons.first();
+    try {
+      await first.waitFor({ state: 'visible', timeout: 5000 });
+      await first.click();
+      await this.page.waitForTimeout(100); // memberi waktu DOM update
+    } catch (error) {
+      console.error('❌ Gagal klik tombol Remove:', error);
+      break; // hindari infinite loop
     }
   }
+}
+
 
   async isItemInCart(productName: string) {
     const itemNames = await this.getCartItemNames();
@@ -410,7 +433,7 @@ test.describe('SauceDemo Cart Page Tests', () => {
       await cartPage.navigateToCart();
       
       expect(await cartPage.getCartItemCount()).toBe(3);
-      
+
       await cartPage.removeAllItems();
       
       expect(await cartPage.getCartItemCount()).toBe(0);

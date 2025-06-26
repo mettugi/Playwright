@@ -35,6 +35,46 @@ export class CartPage {
     return this.itemPrices.allTextContents();
   }
 
+  async getCartItemCount(): Promise<number> {
+    return this.page.locator('.cart_item').count();
+  }
+
+  async isCartEmpty(): Promise<boolean> {
+    return (await this.getCartItemCount()) === 0;
+  }
+
+  async isCartBadgeVisible(): Promise<boolean> {
+    const badge = this.page.locator('.shopping_cart_badge');
+    return await badge.count() > 0 && await badge.isVisible();
+  }
+
+  //async removeAllItems(): Promise<void> {
+    //const removeButtonLocator = this.page.locator('[data-test*="remove"]');
+    //while (await removeButtonLocator.count() > 0) {
+      //await removeButtonLocator.first().click();
+    //}
+  //}
+
+  async removeAllItems(): Promise<void> {
+  let count = await this.removeButtons.count();
+  while (count > 0) {
+    const firstRemove = this.removeButtons.first();
+    await firstRemove.waitFor({ state: 'visible', timeout: 5000 });
+    await firstRemove.click();
+    await this.page.waitForTimeout(500); // beri jeda agar DOM stabil
+    count = await this.removeButtons.count(); // refresh count
+    if (!(await firstRemove.isVisible())) {
+  throw new Error('Remove button is not visible');
+}
+  }
+}
+
+
+  async navigateToCart(): Promise<void> {
+    await this.page.locator('.shopping_cart_link').click();
+    await this.page.waitForLoadState('networkidle');
+  }
+
   async proceedToCheckout() {
     await this.checkoutButton.click();
   }

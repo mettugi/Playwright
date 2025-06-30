@@ -1,0 +1,27 @@
+{
+  "name": "contact-list-automation",
+  "version": "1.0.0",
+  "description": "Playwright TypeScript automation for Contact List App",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:ui": "playwright test --ui",
+    "test:codegen": "playwright codegen https://thinking-tester-contact-list.herokuapp.com/",
+    "install:browsers": "playwright install"
+  },
+  "keywords": ["playwright", "typescript", "automation", "testing"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.0.3",
+    "faker": "^6.6.6"
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "name": "applitools-demo-automation",
+  "version": "1.0.0",
+  "description": "Playwright automation suite for Applitools demo site",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report",
+    "test:login": "playwright test tests/login.spec.ts",
+    "test:dashboard": "playwright test tests/dashboard.spec.ts",
+    "test:visual": "playwright test tests/visual.spec.ts"
+  },
+  "dependencies": {
+    "@playwright/test": "^1.40.0",
+    "dotenv": "^16.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "typescript": "^5.2.2"
+  }
+}

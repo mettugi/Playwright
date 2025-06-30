@@ -147,3 +147,23 @@ export class AddContactPage extends BasePage {
   async verifyRequiredFields(): Promise<void> {
     await this.waitForElement(this.firstNameInput);
     await this.waitForElement(this.lastNameInput);
+    await this.waitForElement(this.emailInput);
+    await this.waitForElement(this.submitButton);
+  }
+
+  /**
+   * Check if submit button is enabled
+   */
+  async isSubmitButtonEnabled(): Promise<boolean> {
+    return await this.submitButton.isEnabled();
+  }
+
+  /**
+   * Fill only required fields
+   */
+  async fillRequiredFields(firstName: string, lastName: string, email: string): Promise<void> {
+    await this.fillInput(this.firstNameInput, firstName);
+    await this.fillInput(this.lastNameInput, lastName);
+    await this.fillInput(this.emailInput, email);
+  }
+}

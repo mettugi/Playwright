@@ -1,0 +1,16 @@
+{
+  "name": "restful-booker-api-playwright",
+  "version": "1.0.0",
+  "description": "API tests for Restful Booker using Playwright and TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:report": "playwright show-report"
+  },
+  "author": "Placebo",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.44.1",
+    "typescript": "^5.4.5"
+  }
+}

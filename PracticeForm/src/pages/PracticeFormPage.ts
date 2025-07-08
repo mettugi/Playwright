@@ -115,9 +115,9 @@ export class PracticeFormPage extends BasePage {
     await expect(this.confirmationTitle).toHaveText('Thanks for submitting the form');
   }
 
-  async closeConfirmationModal(): Promise<void> {
-    await this.clickElement(this.closeButton);
-  }
+  //async closeConfirmationModal(): Promise<void> {
+    //await this.clickElement(this.closeButton);
+  //}
 
   async verifyFieldValidation(field: Locator, shouldHaveError: boolean = true): Promise<void> {
     const expectedColor = shouldHaveError ? VALIDATION_COLORS.ERROR : VALIDATION_COLORS.SUCCESS;

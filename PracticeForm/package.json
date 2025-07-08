@@ -1,0 +1,33 @@
+{
+  "name": "demoqa-playwright-automation",
+  "version": "1.0.0",
+  "description": "Playwright automation tests for DemoQA practice form",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:chrome": "playwright test --project=chromium",
+    "test:firefox": "playwright test --project=firefox",
+    "test:safari": "playwright test --project=webkit",
+    "test:mobile": "playwright test --project=mobile-chrome",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report reports/html-report",
+    "test:trace": "playwright show-trace",
+    "install:browsers": "playwright install",
+    "lint": "eslint src tests --ext .ts",
+    "format": "prettier --write src tests"
+  },
+  "keywords": ["playwright", "automation", "testing", "demoqa"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "eslint": "^8.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "prettier": "^3.0.0"
+  }
+}

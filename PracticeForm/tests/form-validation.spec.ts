@@ -1,5 +1,5 @@
-import { test, expect } from '../../src/fixtures/pageFixtures';
-import { invalidFormData } from '../../src/data/testData';
+import { test, expect } from '../src/fixtures/pageFixtures';
+import { invalidFormData } from '../src/data/testData';
 
 test.describe('Practice Form Validation Tests', () => {
   test.beforeEach(async ({ practiceFormPage }) => {

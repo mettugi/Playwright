@@ -16,7 +16,7 @@ export default defineConfig({
     ['junit', { outputFile: 'reports/test-results.xml' }],
   ],
   use: {
-    baseURL: 'https://demoqa.com',
+    baseURL: 'https://demoqa.com/automation-practice-form',
     headless: process.env.CI ? true : false,
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

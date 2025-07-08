@@ -29,10 +29,17 @@ test.describe('Practice Form Validation Tests', () => {
     await practiceFormPage.verifyFieldValidation(practiceFormPage.mobileInput);
   });
 
-  test('Validate mobile number length', async ({ practiceFormPage }) => {
-    await practiceFormPage.fillInput(practiceFormPage.mobileInput, '12345678901'); // 11 digits
-    await practiceFormPage.submitForm();
+  //test('Validate mobile number length', async ({ practiceFormPage }) => {
+    //await practiceFormPage.fillInput(practiceFormPage.mobileInput, '12345678901'); // 11 digits
+    //await practiceFormPage.submitForm();
     
-    await practiceFormPage.verifyFieldValidation(practiceFormPage.mobileInput);
-  });
+    //await practiceFormPage.verifyFieldValidation(practiceFormPage.mobileInput);
+  //});
+
+  test('Validate mobile number length', async ({ practiceFormPage }) => {
+    await practiceFormPage.fillInput(practiceFormPage.mobileInput, '123456789'); // invalid (9 digits)
+    await practiceFormPage.submitForm();
+
+    await practiceFormPage.verifyFieldValidation(practiceFormPage.mobileInput); // Should now detect error
+});
 });

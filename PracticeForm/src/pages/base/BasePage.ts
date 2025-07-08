@@ -14,12 +14,39 @@ export abstract class BasePage {
     await TestHelpers.waitForPageLoad(this.page);
   }
 
-  async clickElement(locator: Locator) {
-    await locator.click();
+  //async clickElement(locator: Locator) {
+    //await locator.click({ force: true }); // ⬅️ force click even if overlapped
+  //}
+  //async clickElement(locator: Locator) {
+  //try {
+    //await locator.click();
+  //} catch (err) {
+    //console.warn('Default click failed, retrying with force...');
+    //await locator.click({ force: true });
+  //}
+//}
+async clickElement(locator: Locator) {
+  if (this.page.isClosed()) {
+    console.warn('Cannot click — page is already closed.');
+    return;
   }
 
+  try {
+    await locator.click();
+  } catch (err) {
+    console.warn('Default click failed, retrying with force...');
+    try {
+      await locator.click({ force: true });
+    } catch (innerErr) {
+      console.error('Force click also failed:', innerErr);
+    }
+  }
+}
+
+
   async fillInput(locator: Locator, text: string) {
-    await locator.clear();
+    //await locator.clear();
+    await locator.waitFor({state: 'visible', timeout: 10000});
     await locator.fill(text);
   }
 

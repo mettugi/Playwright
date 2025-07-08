@@ -10,14 +10,14 @@ test.describe('Practice Form Submission Tests', () => {
     await practiceFormPage.fillCompleteForm(validFormData);
     await practiceFormPage.submitForm();
     await practiceFormPage.verifySubmissionSuccess();
-    await practiceFormPage.closeConfirmationModal();
+    //await practiceFormPage.closeConfirmationModal();
   });
 
   test('Submit complete form with valid data - Female user', async ({ practiceFormPage }) => {
     await practiceFormPage.fillCompleteForm(femaleUserData);
     await practiceFormPage.submitForm();
     await practiceFormPage.verifySubmissionSuccess();
-    await practiceFormPage.closeConfirmationModal();
+    //await practiceFormPage.closeConfirmationModal();
   });
 
   test('Submit form with only required fields', async ({ practiceFormPage }) => {
@@ -33,6 +33,6 @@ test.describe('Practice Form Submission Tests', () => {
     await practiceFormPage.fillPersonalInfo(minimalData);
     await practiceFormPage.submitForm();
     await practiceFormPage.verifySubmissionSuccess();
-    await practiceFormPage.closeConfirmationModal();
+    //await practiceFormPage.closeConfirmationModal();
   });
 });

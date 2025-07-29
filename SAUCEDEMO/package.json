@@ -1,0 +1,24 @@
+{
+  "name": "sauce-demo-automation",
+  "version": "1.0.0",
+  "description": "Playwright automation tests for Sauce Demo website",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui",
+    "test:debug": "playwright test --debug",
+    "test:report": "playwright show-report",
+    "test:login": "playwright test tests/login.spec.ts",
+    "test:cart": "playwright test tests/cart.spec.ts",
+    "test:navigation": "playwright test tests/navigation.spec.ts"
+  },
+  "keywords": ["playwright", "automation", "testing", "typescript"],
+  "author": "Your Name",
+  "license": "MIT",
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}
